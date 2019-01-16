@@ -5,8 +5,8 @@
   .inesmir 1   ; Specify VRAM background mirroring of the banks. vertical mirroring.
 
 
-	.org $8000
-	.bank 0
+  .org $8000
+  .bank 0
 
 Start:
   ; PPU Control Register #1 configuration
@@ -34,8 +34,8 @@ Start:
   ;         10 = $2800 (VRAM)
   ;         11 = $2C00 (VRAM)
   ;     76543210 <-- bit digit identifiers
-	lda #%00001000
-	sta $2000
+  lda #%00001000
+  sta $2000
 
 
   ; PPU Control Register #2 configuration
@@ -66,8 +66,8 @@ Start:
   ;          1 = Monochrome display
   ;
   ;     76543210 <-- bit digit identifier
-	lda #%00011110
-	sta $2001
+  lda #%00011110
+  sta $2001
 
   ; Prepare to write the palette data.
   ; Set the PPU VRAM to $3F00, where the palette data starts.
@@ -161,8 +161,8 @@ Start:
 
 ; Loop until VBlank is done.
 vwait:
-	lda $2002
-	bpl vwait
+  lda $2002
+  bpl vwait
 
   ; Prepare to write nametables.
   ; Set PPU to the start of VRAM at $2020, the
@@ -184,7 +184,7 @@ LoadBackgroundLoop:
                         ; if compare was equal to 128, keep going down
 
 Loop:
-	jmp Loop
+  jmp Loop
 
 ; Write the "Vector table," which starts at $FFFA.
   .bank 1
