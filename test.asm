@@ -1,9 +1,12 @@
 ; INES header setup
-  .inesprg 1   ; Specify a single (1) 16kb PRG bank.
-  .ineschr 1   ; Specity a single (1) 8kb CHR bank.
-  .inesmap 0   ; Specify the NES mapper. mapper 0 = NROM, no bank swapping, no mapper.
-  .inesmir 1   ; Specify VRAM background mirroring of the banks. vertical mirroring.
-
+  ; Specify a single (1) 16kb PRG bank.
+  .inesprg 1
+  ; Specity a single (1) 8kb CHR bank.
+  .ineschr 1
+  ; Specify the NES mapper. mapper 0 = NROM, no bank swapping, no mapper.
+  .inesmap 0
+  ; Specify VRAM background mirroring of the banks. vertical mirroring.
+  .inesmir 1
 
   .org $8000
   .bank 0
@@ -161,27 +164,38 @@ Start:
 
 ; Loop until VBlank is done.
 vwait:
+  ; Reset the address latch
   lda $2002
-  bpl vwait
+  ; Hmm I'm commenting this out and it's working better? I wonder where I got this from?
+  ; bpl vwait
 
   ; Prepare to write nametables.
-  ; Set PPU to the start of VRAM at $2020, the
-  lda #$20
+  ; Set PPU to the start of VRAM at $2000, the beginning of the nametable.
+  ; see https://wiki.nesdev.com/w/index.php/PPU_nametables
+  lda #$21
   sta $2006
-  lda #$20
+  lda #$00
   sta $2006
 
-  ;write pattern table tile numbers to the name table
+  ; a = the index of the inner loop to write to the nametable
   lda #$00
-  sta $2007
+  ; x = the index of the top-level loop
+  ldx #$00
+  ; y = the index of the pattern table to write to the nametable
+  ldy #$00
 
 ;
 LoadBackgroundLoop:
-  sta $2007             ; write to PPU
+  ; write a tile to PPU
+  sty $2007
+  ; increment the pattern tile index
   adc #$01
-  cmp #$ff              ; Compare X to hex $80, decimal 128 - copying 128 bytes
-  bne LoadBackgroundLoop  ; Branch to LoadBackgroundLoop if compare was Not Equal to zero
-                        ; if compare was equal to 128, keep going down
+  ; break when we've gone through 256 tile writes
+  cmp #$ff
+  bne LoadBackgroundLoop
+  inx
+  cpx #$04
+  bne LoadBackgroundLoop
 
 Loop:
   jmp Loop
