@@ -37,9 +37,6 @@
 ; I will leave it as an exercise for the curious to understand what is going on.
 ;
 
-;
-; iNES header
-;
 
 .segment "HEADER"
 
@@ -47,6 +44,7 @@ INES_MAPPER = 0 ; 0 = NROM
 INES_MIRROR = 1 ; 0 = horizontal mirroring, 1 = vertical mirroring
 INES_SRAM   = 0 ; 1 = battery backed SRAM at $6000-7FFF
 
+; Write the iNES header
 .byte 'N', 'E', 'S', $1A ; ID
 .byte $02 ; 16k PRG chunk count
 .byte $01 ; 8k CHR chunk count
@@ -54,32 +52,26 @@ INES_SRAM   = 0 ; 1 = battery backed SRAM at $6000-7FFF
 .byte (INES_MAPPER & %11110000)
 .byte $0, $0, $0, $0, $0, $0, $0, $0 ; padding
 
-;
-; CHR ROM
-;
 
+; Load the background and sprite tiles into read-only memory
+; for use by the PPU
 .segment "TILES"
 .incbin "ikio.chr"
 ; .incbin "sprite.chr"
 
-;
-; vectors placed at top 6 bytes of memory area
-;
-
+; Set the callback labels for various NES lifecycle events.
 .segment "VECTORS"
 .word nmi
 .word reset
 .word irq
 
-;
-; reset routine
-;
 
 .segment "CODE"
+; Reset routine.
 reset:
-	; mask interrupts, which basically avoid hitting irq / brk handling?
+	; Disable interrupts during the initialization stage.
 	sei
-	; write to PPU controller to disable NMI
+	; Disable NMI interrupts during the initialization stage.
 	lda #0
 	sta $2000
 	; write to PPU mask to disable rendering
